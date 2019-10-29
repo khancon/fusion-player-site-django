@@ -1,0 +1,9 @@
+{% if listener_list %}
+    <ul>
+        {% for listener in listener_list %}
+            <li>{{ listener.listener_name }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}
