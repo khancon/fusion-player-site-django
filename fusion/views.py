@@ -19,7 +19,7 @@ def songs(request):
     return HttpResponse(list1)
 
 def listeners(request):
-    mycursor.execute("INSERT INTO Album(album_id, genre, year, name) VALUES(%s,%s,%s,%s)", ('19', 'EDM', '2015', 'Nadia Hassan'))
+    mycursor.execute("INSERT INTO Album(album_id, genre, year, name) VALUES(%s,%s,%s,%s)", ('20', 'Hip Hop', '2015', 'City Girls'))
     cnx.commit()
     mycursor.execute("SELECT * FROM Album")
     listener_list=[]
