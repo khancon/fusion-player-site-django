@@ -19,9 +19,14 @@ def songs(request):
     return HttpResponse(list1)
 
 def listeners(request):
-    mycursor.execute("SELECT * FROM Listener")
+    mycursor.execute("INSERT INTO Album(album_id, genre, year, name) VALUES(%s,%s,%s,%s)", ('15', 'EDM', '2015', 'Lights'))
+    cnx.commit()
+    mycursor.execute("SELECT * FROM Album")
     listener_list=[]
     for item in mycursor:
         listener_list.append(item)
 
-    return render(request, 'fusion/listeners.html', {'listener_list':listener_list})
+    mycursor.close()
+    cnx.close()
+    #return HttpResponse(listener_list)
+    return render(request, 'fusion/listeners.html', {'listener_list': listener_list})
