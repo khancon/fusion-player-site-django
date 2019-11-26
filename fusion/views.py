@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.views.generic import TemplateView, ListView
+from .forms import NameForm
 import mysql.connector
 
 
@@ -51,6 +52,26 @@ class AlbumSearchView(ListView):
         mycursor.close()
         cnx.close()
         return album_list
+
+class PlaylistsView(TemplateView):
+    template_name = 'fusion/playlists.html'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(PlaylistsView, self).get_context_data(*args, **kwargs)
+        mycursor, cnx = getCursor()
+        username = self.request.user
+        if username != 'AnonymousUser':
+            mycursor.execute("SELECT * FROM playlist WHERE username = %s", (str(username),))
+        
+        playlists=[]
+        for item in mycursor:
+            playlists.append(item)
+        mycursor.close()
+        cnx.close()
+        context['playlists'] = playlists
+        context['form'] = NameForm
+        return context
+        
 
 def listeners(request):
     mycursor, cnx = getCursor()
