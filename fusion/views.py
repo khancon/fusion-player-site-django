@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView, ListView
 import mysql.connector
 
@@ -13,10 +13,33 @@ def getCursor():
 #------- Views -----#
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the fusion index.")
+    return HttpResponse("Hello, world. You're at the fusion index.")    
 
-class SearchResultsView(ListView):
-    template_name = 'fusion/search_results.html'
+
+
+class SongsView(TemplateView):
+    template_name = 'fusion/songs.html'
+
+class SongSearchView(ListView):
+    template_name = 'fusion/song_search.html'
+
+    def get_queryset(self):
+        mycursor, cnx = getCursor()
+        query = self.request.GET.get('q')
+        #TODO: Replace 'Album' with 'Song'. It appears that the table 'Song' does not exist yet.
+        mycursor.execute("SELECT * FROM Album WHERE name LIKE %s", ("%" + query + "%",))
+        song_list=[]
+        for item in mycursor:
+            song_list.append(item)
+        mycursor.close()
+        cnx.close()
+        return song_list
+
+class AlbumsView(TemplateView):
+    template_name = 'fusion/albums.html'
+
+class AlbumSearchView(ListView):
+    template_name = 'fusion/album_search.html'
 
     def get_queryset(self):
         mycursor, cnx = getCursor()
@@ -25,22 +48,9 @@ class SearchResultsView(ListView):
         album_list=[]
         for item in mycursor:
             album_list.append(item)
-        print(mycursor)
         mycursor.close()
         cnx.close()
         return album_list
-
-class AlbumsView(TemplateView):
-    template_name = 'fusion/albums.html'
-
-def songs(request):
-    mycursor, cnx  = getCursor()
-    mycursor.execute("SELECT * FROM Album")
-    list1=[]
-    for item in mycursor:
-        list1.append(item[3] + '<br>')
-    cnx.close() 
-    return HttpResponse(list1)
 
 def listeners(request):
     mycursor, cnx = getCursor()

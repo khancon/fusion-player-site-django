@@ -5,7 +5,7 @@
     $("#id_q").change(function () {
       var queryString = ( $(this).val() );
       $.ajax({
-        url: '/ajax/album_search/',
+        url: '/ajax/song_search/',
         data: {
           'q': queryString
         },
@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>Albums</h1>
+<h1>Songs</h1>
 
 <form action="javascript:void(0);">
     {% csrf_token %}
