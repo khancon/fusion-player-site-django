@@ -19,7 +19,8 @@ def index(request):
     return render(request, "fusion/index.html")
     #return HttpResponse("Hello, world. You're at the fusion index.")    
 
-
+class WelcomePageView(TemplateView):
+    template_name = 'fusion/welcome_page.html'
 
 class SongsView(TemplateView):
     template_name = 'fusion/songs.html'
