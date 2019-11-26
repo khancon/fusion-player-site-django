@@ -130,3 +130,4 @@ django_heroku.settings(locals())
 
 # Send logged in users to the home page
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/welcome'

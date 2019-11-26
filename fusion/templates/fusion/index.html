@@ -1,19 +1,19 @@
 {% extends 'fusion/base.html' %}
 
 {% block content %}
-{% if user.is_authenticated %}
-  Hi {{ user.username }}!
-  <p><a href="{% url 'logout' %}">logout</a></p>
-{% else %}
-  <p>You are not logged in</p>
-  <a href="{% url 'login' %}">login</a>
-{% endif %}
+
 <div class="container">
     <br>
     <h1>Fusion!</h1>
     <body>
         <hr>
-        <h6>Click a Link!</h6>
+        {% if user.is_authenticated %}
+            <h6> Hi {{ user.username }}! </h6>
+            <p><a href="{% url 'logout' %}" class="btn btn-large btn-secondary" type="button">Logout</a></p>
+        {% else %}
+            <h6>You are not logged in</h6>
+            <a href="{% url 'login' %}" class="btn btn-large btn-secondary" type="button">Login</a>
+        {% endif %}
         <hr>
         <div class="span9 btn-block">
             <a href="{% url 'songs' %}" class="btn btn-large btn-block" type="button" style="background-color:#e74c3c;color:white" name="song-click">Songs</a>
