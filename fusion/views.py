@@ -16,7 +16,7 @@ class IndexView(TemplateView):
     template_name = 'fusion/index.html'
 
 class WelcomePageView(TemplateView):
-    template_name = 'fusion/welcome_page.html'
+    template_name = 'fusion/welcome.html'
 
 class SongsView(TemplateView):
     template_name = 'fusion/songs.html'
