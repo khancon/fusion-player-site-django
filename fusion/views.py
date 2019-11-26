@@ -7,7 +7,7 @@ import mysql.connector
 #------ Helper function  --------#
 
 def getCursor():
-    cnx = mysql.connector.connect(user='aak6sk', password='vahZee6n', host='cs4750.cs.virginia.edu', database='aak6sk')
+    cnx = mysql.connector.connect(user='dc3jr', password='applesandoranges', host='cs4750.cs.virginia.edu', database='dc3jr')
     return cnx.cursor(), cnx
 
 #------- Views -----#
@@ -15,6 +15,11 @@ def getCursor():
 def index(request):
     return HttpResponse("Hello, world. You're at the fusion index.")    
 
+class HomeView(TemplateView):
+    template_name = 'fusion/home.html'
+
+class WelcomeView(TemplateView):
+    template_name = 'welcome.html'
 
 
 class SongsView(TemplateView):
@@ -26,8 +31,7 @@ class SongSearchView(ListView):
     def get_queryset(self):
         mycursor, cnx = getCursor()
         query = self.request.GET.get('q')
-        #TODO: Replace 'Album' with 'Song'. It appears that the table 'Song' does not exist yet.
-        mycursor.execute("SELECT * FROM Album WHERE name LIKE %s", ("%" + query + "%",))
+        mycursor.execute("SELECT * FROM song WHERE name LIKE %s", ("%" + query + "%",))
         song_list=[]
         for item in mycursor:
             song_list.append(item)
@@ -44,7 +48,7 @@ class AlbumSearchView(ListView):
     def get_queryset(self):
         mycursor, cnx = getCursor()
         query = self.request.GET.get('q')
-        mycursor.execute("SELECT * FROM Album WHERE name LIKE %s", ("%" + query + "%",))
+        mycursor.execute("SELECT * FROM album WHERE name LIKE %s", ("%" + query + "%",))
         album_list=[]
         for item in mycursor:
             album_list.append(item)
