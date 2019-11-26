@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.views.generic import TemplateView, ListView
 import mysql.connector
 
@@ -12,11 +12,8 @@ def getCursor():
 
 #------- Views -----#
 
-def index(request):
-    return HttpResponse("Hello, world. You're at the fusion index.")    
-
-class HomeView(TemplateView):
-    template_name = 'fusion/home.html'
+class IndexView(TemplateView):
+    template_name = 'fusion/index.html'
 
 class WelcomeView(TemplateView):
     template_name = 'welcome.html'
@@ -58,7 +55,7 @@ class AlbumSearchView(ListView):
 
 def listeners(request):
     mycursor, cnx = getCursor()
-    mycursor.execute("INSERT INTO Album(album_id, genre, year, name) VALUES(%s,%s,%s,%s)", ('20', 'Hip Hop', '2015', 'City Girls'))
+    mycursor.execute("INSERT INTO Album(album_id, genre, year, name) VALUES(%s,%s,%s,%s)", ('21', 'Hip Hop', '2015', 'City Girlsss'))
     cnx.commit()
     mycursor.execute("SELECT * FROM Album")
     listener_list=[]

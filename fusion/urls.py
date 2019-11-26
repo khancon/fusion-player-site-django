@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import views
-from .views import SongsView, SongSearchView,AlbumSearchView, AlbumsView, HomeView
+from .views import SongsView, SongSearchView,AlbumSearchView, AlbumsView, IndexView
 
 urlpatterns = [
     # For the signup page
@@ -8,7 +8,7 @@ urlpatterns = [
     # For the signin page
     path('accounts/', include('django.contrib.auth.urls')),
     #path('welcome/',WelcomePageView.as_view(),name='welcome'),
-    path('', HomeView.as_view(), name='index'),
+    path('', IndexView.as_view(), name='index'),
     path('songs/',SongsView.as_view(),name='songs'),
     #path('song/<int:song_id>',SongView.as_view(),name='song')
     path('albums/', AlbumsView.as_view(),name='albums'),

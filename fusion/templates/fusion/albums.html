@@ -19,12 +19,15 @@
 {% endblock %}
 
 {% block content %}
-<h1>Albums</h1>
-
-<form action="javascript:void(0);">
-    {% csrf_token %}
-    <input name="q" type="text" placeholder="Search..." id="id_q">
-</form>
-
-<div id="result"></div>
+<div class="container">
+  <br>
+  <h1>Albums</h1>
+  <hr>
+  <form action="javascript:void(0);">
+      {% csrf_token %}
+      <input name="q" type="text" placeholder="Search..." id="id_q">
+  </form>
+  
+  <div id="result"></div>
+</div>
 {% endblock %}
