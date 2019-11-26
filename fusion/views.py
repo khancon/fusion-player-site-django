@@ -15,9 +15,8 @@ def getCursor():
 class IndexView(TemplateView):
     template_name = 'fusion/index.html'
 
-class WelcomeView(TemplateView):
-    template_name = 'welcome.html'
-
+class WelcomePageView(TemplateView):
+    template_name = 'fusion/welcome_page.html'
 
 class SongsView(TemplateView):
     template_name = 'fusion/songs.html'
