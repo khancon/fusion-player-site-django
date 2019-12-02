@@ -1,21 +1,51 @@
 {% extends 'fusion/base.html' %}
 
+{% block javascript %}
+  <script>
+    $("#id_q").change(function () {
+      var queryString = ( $(this).val() );
+      $.ajax({
+        url: '/ajax/playlist_search/',
+        data: {
+          'q': queryString
+        },
+        dataType: 'html',
+        success: function (data) {
+            $("#result").html(data);
+        }
+      })
+    });
+  </script>
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <br>
-    <h1>My Playlists</h1>
+    <h1>Playlists</h1>
+    <hr>
+    <h2>My Playlists</h2>
     <hr>
     <ul>
-        {% for obj in playlists %}
+        {% for obj in my_playlists %}
             <li>
                 {{ obj }}
             </li>
+        {% empty %}
+            <p>You do not have any playlists</p>
         {% endfor %}
     </ul>
+    <h2>Create Playlist</h2>
     <form action="/playlists/" method="post">
         {% csrf_token %}
         {{ form }}
-        <input type="submit" value="Submit">
+        <input type="submit" value="Create">
     </form>
+    <hr>
+    <h2>Find Playlists</h2>
+    <form action="javascript:void(0);">
+        {% csrf_token %}
+        <input name="q" type="text" placeholder="Search..." id="id_q">
+    </form>
+    <div id="result"></div>
 </div>
 {% endblock %}
