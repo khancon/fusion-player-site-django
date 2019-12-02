@@ -28,7 +28,7 @@
     {% for obj in my_playlists %}
       {% if forloop.first %}<div class="row">{% endif %}
         <div class="col-sm-4">
-            <div class="card" style="border-color:#2ecc71">
+            <div class="card text-center" style="border-color:#2ecc71">
                 <div class="card-body" style="background-color:white;color:#2ecc71">
                     <h4 class="card-title">{{ obj.2 }}</h5>
                     By {{obj.0}} | Created {{obj.3}} <br><br>
