@@ -7,8 +7,8 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     # For the signin page
     path('accounts/', include('django.contrib.auth.urls')),
-    path('',WelcomePageView.as_view(),name='welcome'),
-    path('index/', IndexView.as_view(), name='index'),
+    path('welcome/',WelcomePageView.as_view(),name='welcome'),
+    path('', IndexView.as_view(), name='index'),
     path('songs/',SongsView.as_view(),name='songs'),
     #path('songs/<int:song_id>',SongView.as_view(),name='song')
     path('albums/', AlbumsView.as_view(),name='albums'),
