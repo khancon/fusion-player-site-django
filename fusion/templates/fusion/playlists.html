@@ -42,7 +42,7 @@
         <p>You do not have any playlists</p>
     {% endfor %}
     <br>
-    <h2>Create Playlist</h2>
+    <h6>Add a New Playlist:</h6>
     <form action="/playlists/" method="post">
         {% csrf_token %}
         {{ form }}
