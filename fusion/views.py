@@ -29,7 +29,7 @@ class SongSearchView(ListView):
     def get_queryset(self):
         mycursor, cnx = getCursor()
         query = self.request.GET.get('q')
-        mycursor.execute("SELECT * FROM song WHERE name LIKE %s", ("%" + query + "%",))
+        mycursor.execute("SELECT * FROM song JOIN album USING (album_id) WHERE s_name LIKE %s", ("%" + query + "%",))
         song_list=[]
         for item in mycursor:
             song_list.append(item)
