@@ -1,9 +1,20 @@
 {% block content %}
-<ul>
-    {% for obj in object_list %}
-        <li>
-            {{ obj }}
-        </li>
-    {% endfor %}
-</ul>
+<br>
+{% for obj in object_list %}
+    <!-- <li>
+        {{ obj }}
+    </li> -->
+    {% if forloop.first %}<div class="row">{% endif %}
+    <div class="col-sm-4">
+        <div class="card" style="border-color:#e74c3c">
+            <div class="card-body" style="background-color:white;color:#e74c3c">
+                <h4 class="card-title">{{ obj.4 }}</h5>
+                {{obj.7}}, {{obj.6}} <br><br>
+                <a href="#" class="btn btn-large" type="button" style="background-color:#e74c3c;color:white" name="song-click">Add to Playlist</a>
+            </div>
+        </div>
+    </div>
+    {% if forloop.counter|divisibleby:3 %}</div><br><div class="row">{% endif %}
+    {% if forloop.last %}</div>{% endif %}
+{% endfor %}
 {% endblock %}
