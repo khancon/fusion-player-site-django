@@ -23,19 +23,21 @@ class WelcomePageView(TemplateView):
 class SongsView(TemplateView):
     template_name = 'fusion/songs.html'
 
-class SongSearchView(ListView):
-    template_name = 'fusion/song_search.html'
-
-    def get_queryset(self):
+class SongSearchView(View):
+    def get(self, request, *args, **kwargs):
         mycursor, cnx = getCursor()
         query = self.request.GET.get('q')
+        playlist_id = self.request.GET.get('playlist_id')
         mycursor.execute("SELECT * FROM song JOIN album USING (album_id) WHERE s_name LIKE %s", ("%" + query + "%",))
         song_list=[]
         for item in mycursor:
             song_list.append(item)
         mycursor.close()
         cnx.close()
-        return song_list
+        context = {}
+        context['object_list'] = song_list
+        context['playlist_id'] = playlist_id
+        return render(request, 'fusion/song_search.html', context)
 
 class AlbumsView(TemplateView):
     template_name = 'fusion/albums.html'
@@ -84,6 +86,24 @@ class PlaylistsView(View):
         cnx.close()
         return redirect('/playlists/')
 
+class PlaylistDetailView(View):
+    def get(self, request, *args, **kwargs):
+        mycursor, cnx = getCursor()
+        username = self.request.user
+        playlist_id = kwargs['playlist_id']
+        if playlist_id != None:
+            mycursor.execute("SELECT * FROM playlist WHERE playlist_id = %s", (playlist_id,))
+
+        playlist = "404"
+        for item in mycursor:
+            playlist = item
+
+        mycursor.close()
+        cnx.close()
+        context = {}
+        context['playlist'] = playlist
+        return render(request, 'fusion/playlist.html', context)
+
 class PlaylistSearchView(ListView):
     template_name = 'fusion/playlist_search.html'
 
@@ -97,6 +117,13 @@ class PlaylistSearchView(ListView):
         mycursor.close()
         cnx.close()
         return playlist_list
+
+class PlaylistModificationView(View):
+    def get(self, request, *args, **kwargs):
+        print("HEY, GET")
+
+    def post(self, request, *args, **kwargs):
+        print("HEY, POST")
 
 def listeners(request):
     mycursor, cnx = getCursor()

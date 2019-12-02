@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import views
-from .views import SongsView, SongSearchView,AlbumSearchView, AlbumsView, IndexView, WelcomePageView, PlaylistsView, PlaylistSearchView
+from .views import SongsView, SongSearchView,AlbumSearchView, AlbumsView, IndexView, WelcomePageView, PlaylistsView, PlaylistSearchView, PlaylistDetailView, PlaylistModificationView
 
 urlpatterns = [
     # For the signup page
@@ -16,9 +16,10 @@ urlpatterns = [
     #path('artists/',Artists.as_view(),name='artists'),
     #path('artist/<int:artist_id>/',Artist.as_view(),name='artist'),
     path('playlists/', PlaylistsView.as_view(), name='playlists'),
-    #path('playlists/<int:playlist_id>/',PlaylistsView.as_view(), name='playlist'),
+    path('playlists/<int:playlist_id>/',PlaylistDetailView.as_view(), name='playlist'),
     path('listeners/', views.listeners, name='listeners'), 
     path('ajax/song_search/', SongSearchView.as_view(), name='song_search'),
     path('ajax/album_search/', AlbumSearchView.as_view(), name='album_search'),
     path('ajax/playlist_search/', PlaylistSearchView.as_view(), name='playlist_search'),
+    path('ajax/playlist_modification', PlaylistModificationView.as_view(), name='playlist_modification')
 ]
