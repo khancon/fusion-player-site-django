@@ -6,6 +6,7 @@ import mysql.connector
 import datetime
 from django.contrib.auth.models import User
 import json
+import csv
 
 
 #------ Helper function  --------#
@@ -136,7 +137,18 @@ class InfoPageView(View):
         cnx.close()
         context = {}
         context['object_list'] = song_list
-        return render(request, 'fusion/info.html', context)
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="playlist_containing_song.csv"'
+
+        writer = csv.writer(response)
+        
+        writer.writerow(['song_id','playlist_id','username','name','time_created','album_id','#_streams','length','sname'])
+        for item in song_list:
+            writer.writerow(item)
+
+        return response
+        #return render(request, "fusion/info.html", context)
 
 class PlaylistSearchView(ListView):
     template_name = 'fusion/playlist_search.html'
