@@ -5,6 +5,7 @@ from .forms import NameForm
 import mysql.connector
 import datetime
 from django.contrib.auth.models import User
+import json
 
 
 #------ Helper function  --------#
@@ -153,7 +154,9 @@ class PlaylistSearchView(ListView):
 
 class PlaylistSongsView(View):
     def get(self, request, *args, **kwargs):
-        playlist_id = kwargs['playlist_id']
+        playlist_id = request.GET.get('playlist_id')
+        if playlist_id is None:
+            playlist_id = kwargs['playlist_id']
         mycursor, cnx = getCursor()
         mycursor.execute("SELECT DISTINCT * FROM containing NATURAL JOIN song NATURAL JOIN album WHERE playlist_id = %s", (playlist_id,))
         song_list=[]
@@ -163,7 +166,7 @@ class PlaylistSongsView(View):
         cnx.close()
         context = {}
         context['object_list'] = song_list
-        print(song_list)
+        context['playlist_id'] = playlist_id
         return render(request, 'fusion/playlist_songs.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -177,8 +180,13 @@ class PlaylistSongsView(View):
         return PlaylistSongsView.get(self, request, playlist_id=playlist_id)
 
     def delete(self, request, *args, **kwargs):
-        song_id = self.request.POST['song_id']
-        playlist_id = self.request.POST['playlist_id']
+        data = str(request.body)
+        song_id_index = data.index('song_id=') + 8
+        end_of_song_id = data.index('&',song_id_index)
+        playlist_id_index = data.index('playlist_id=') + 12
+        end_of_playlist_id = data.index('&',playlist_id_index)
+        song_id = int(data[song_id_index:end_of_song_id])
+        playlist_id = int(data[playlist_id_index:end_of_playlist_id])
         mycursor, cnx = getCursor()
         mycursor.execute("DELETE FROM containing WHERE playlist_id = %s and song_id = %s", (playlist_id, song_id))
         cnx.commit()

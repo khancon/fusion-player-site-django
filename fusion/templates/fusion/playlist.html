@@ -16,6 +16,18 @@
         }
       })
     });
+    $(document).ready(function () {
+      $.ajax({
+        url: '/ajax/playlist_songs/',
+        data: {
+          'playlist_id': "{{playlist.1}}"
+        },
+        dataType: 'html',
+        success: function (data) {
+            $("#playlist_songs").html(data);
+        }
+      })
+    });
   </script>
 {% endblock %}
 
