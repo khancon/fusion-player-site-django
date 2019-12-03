@@ -25,11 +25,11 @@ class IndexView(View):
         mycursor.execute("SELECT * FROM listener")
         username_list = []
         for item in mycursor:
-            username_list.append(item[0])
+            username_list.append(item[0].upper())
         
         print(username_list)
         for user in users:
-            if user.username not in username_list:
+            if user.username.upper() not in username_list:
                 mycursor.execute("INSERT INTO listener(username, password) VALUES (%s,%s)", (user.username, user.password))
                 cnx.commit()
 
@@ -115,7 +115,7 @@ class PlaylistsView(View):
         query = self.request.POST['name']
         time = datetime.datetime.now().replace(microsecond=0).isoformat()
         if username != 'AnonymousUser':
-            mycursor.execute("INSERT INTO playlist(username, name, time_created) VALUES(%s,%s,%s)", (username,query,time))
+            mycursor.execute("INSERT INTO playlist(username, name,time_created) VALUES(%s,%s,%s)", (username,query,time))
             cnx.commit()
         mycursor.close()
         cnx.close()
@@ -249,4 +249,43 @@ def listeners(request):
     cnx.close()
     return render(request, 'fusion/listeners.html', {'listener_list': listener_list})
 
-#SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY song_id 
+class ListenerDetailView(View):
+    def get(self, request, *args, **kwargs):
+        listener_username = kwargs['listener_username']
+        mycursor, cnx = getCursor()
+        if listener_username != None:
+            mycursor.execute("SELECT * FROM listener WHERE username = %s", (listener_username,))
+
+        listener = None
+        for item in mycursor:
+            listener = item
+
+        if listener != 'AnonymousUser':
+            mycursor.execute("SELECT * FROM playlist WHERE username = %s", (listener[0],))
+        
+        my_playlists=[]
+        for item in mycursor:
+            my_playlists.append(item)
+
+        mycursor.close()
+        cnx.close()
+        context = {}
+        context['listener'] = listener[0]
+        context['current_user'] = str(self.request.user)
+        context['my_playlists'] = my_playlists
+        return render(request, 'fusion/listener.html', context)
+
+class FriendsView(View):
+    def get(self, request, *args, **kwargs):
+        return HttpResponse("got friend")
+
+    def post(self, request, *args, **kwargs):
+        current_user = self.request.POST['current_user']
+        listener = self.request.POST['listener']
+        date = datetime.datetime.now().replace(microsecond=0).isoformat()
+        mycursor, cnx = getCursor()
+        mycursor.execute("INSERT INTO friends_with (listener_username, friend_username, starting_date) VALUES(%s,%s, %s)", (current_user, listener, date))
+        cnx.commit()
+        mycursor.close()
+        cnx.close()
+        return HttpResponse(listener + " added as a friend")
