@@ -46,6 +46,22 @@
         }
       })
     }
+
+    function createMashup(current_user, listener) {
+      $.ajax({
+        type: "POST",
+        url: '/ajax/mashup/',
+        data: {
+            'current_user': current_user,
+            'listener': listener,
+            'csrfmiddlewaretoken': getCookie('csrftoken')
+        },
+        dataType: 'html',
+        success: function (data) {
+            $("#mashup_status").html(data);
+        }
+      })
+    }
   </script>
 {% endblock %}
 
@@ -54,7 +70,9 @@
   <br>
   <h1>User: {{listener}}</h1>
   <div id="friend_status"></div>
+  <div id="mashup_status"></div>
   <a onclick="addFriend('{{current_user}}','{{listener}}')" class="btn btn-small" type="button" style="background-color:#2ecc71;color:white" name="playlist-click">Add friend</a>
+  <a onclick="createMashup('{{current_user}}','{{listener}}')" class="btn btn-small" type="button" style="background-color:#2ecc71;color:white" name="mashup-click">Create Mashup</a>
   <hr>
   <h2>{{listener}}'s Playlists</h2>
     <hr>

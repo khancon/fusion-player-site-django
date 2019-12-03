@@ -7,6 +7,7 @@ import datetime
 from django.contrib.auth.models import User
 import json
 import csv
+import random
 
 
 #------ Helper function  --------#
@@ -161,7 +162,7 @@ class AlbumDetailView(View):
 class InfoPageView(View):
     def get(self, request, *args, **kwargs):
         mycursor, cnx = getCursor()
-        mycursor.execute("SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY name")
+        mycursor.execute("SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY time_created")
         song_list=[]
         for item in mycursor:
             song_list.append(item)
@@ -305,3 +306,40 @@ class FriendsView(View):
         mycursor.close()
         cnx.close()
         return HttpResponse(listener + " added as a friend")
+
+class MashupView(View):
+    def get(self, request, *args, **kwargs):
+        return HttpResponse("got mashup")
+
+    def post(self, request, *args, **kwargs):
+        current_user = self.request.POST['current_user']
+        listener = self.request.POST['listener']
+        date = datetime.datetime.now().replace(microsecond=0).isoformat()
+        mycursor, cnx = getCursor()
+        my_songs = []
+        listener_songs = []
+        mycursor.execute("SELECT song_id FROM `playlist` JOIN `containing` USING (playlist_id) JOIN `song` USING (song_id) WHERE username = %s", (current_user,))
+        for item in mycursor:
+            my_songs.append(item[0])
+        mycursor.execute("SELECT song_id FROM `playlist` JOIN `containing` USING (playlist_id) JOIN `song` USING (song_id) WHERE username = %s", (listener,))
+        for item in mycursor:
+            my_songs.append(item[0])
+        sampling = random.choices(my_songs, k=10)
+        
+        date = datetime.datetime.now().replace(microsecond=0).isoformat()
+        mashup_name = current_user + ' and ' + listener + ' mashup'
+        mycursor.execute("INSERT INTO playlist (username, name, time_created) VALUES(%s,%s, %s)", (current_user, mashup_name, date))
+        cnx.commit()
+        mycursor.execute("SELECT playlist_id FROM `playlist` WHERE name = %s", (mashup_name,))
+        playlist_id = None
+        for item in mycursor:
+            playlist_id = item[0]
+        print(playlist_id)
+        sampling = list(dict.fromkeys(sampling))
+        print(sampling)
+        for song_id in sampling:
+            mycursor.execute("INSERT INTO containing (playlist_id, song_id) VALUES(%s,%s)", (playlist_id, song_id))
+        cnx.commit()
+        mycursor.close()
+        cnx.close()
+        return HttpResponse("Mashup created")
