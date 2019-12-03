@@ -8,11 +8,11 @@
     <body>
         <hr>
         {% if user.is_authenticated %}
-            <h6> Hi {{ user.username }}! </h6>
+            <h6> Hi {{ user.username|capfirst }}! </h6>
             <p><a href="{% url 'logout' %}" class="btn btn-large btn-secondary" type="button">Logout</a></p>
         {% else %}
             <h6>You are not logged in</h6>
-            <a href="{% url 'login' %}" class="btn btn-large btn-secondary" type="button">Login</a>
+            <a href="{% url 'welcome' %}" class="btn btn-large btn-secondary" type="button">Login</a>
         {% endif %}
         <hr>
         <div class="span9 btn-block">
@@ -22,16 +22,16 @@
             <a href="{% url 'albums' %}" class="btn btn-large btn-block" type="button" style="background-color:#e67e22;color:white" name="album-click">Albums</a>
         </div>
         <div class="span9 btn-block">
-            <a class="btn btn-large btn-block" type="button" style="background-color:#f1c40f;color:white" name="playlist-click">Playlists</a>
+            <a href="{% url 'listeners' %}" class="btn btn-large btn-block" type="button" style="background-color:#f1c40f;color:white" name="friend-click">Friends</a>
         </div>
         <div class="span9 btn-block">
-            <a class="btn btn-large btn-block" type="button" style="background-color:#2ecc71;color:white" name="friend-click">Friends</a>
+            <a href="{% url 'playlists' %}" class="btn btn-large btn-block" type="button" style="background-color:#2ecc71;color:white" name="playlist-click">Playlists</a>
         </div>
         <div class="span9 btn-block">
             <a class="btn btn-large btn-block" type="button" style="background-color:#3498db;color:white" name="artist-click">Artists</a>
         </div>
         <div class="span9 btn-block">
-            <a class="btn btn-large btn-block" type="button" style="background-color:#9b59b6;color:white" name="artist-click">Info</a>
+            <a href="{% url 'info' %}" class="btn btn-large btn-block" type="button" style="background-color:#9b59b6;color:white" name="artist-click">Info</a>
         </div>
     </body>
 </div>

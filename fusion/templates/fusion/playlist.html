@@ -1,0 +1,50 @@
+{% extends 'fusion/base.html' %}
+
+{% block javascript %}
+  <script>
+    $("#id_q").change(function () {
+      var queryString = ( $(this).val() );
+      $.ajax({
+        url: '/ajax/song_search/',
+        data: {
+          'q': queryString,
+          'playlist_id': "{{playlist.1}}"
+        },
+        dataType: 'html',
+        success: function (data) {
+            $("#result").html(data);
+        }
+      })
+    });
+    $(document).ready(function () {
+      $.ajax({
+        url: '/ajax/playlist_songs/',
+        data: {
+          'playlist_id': "{{playlist.1}}"
+        },
+        dataType: 'html',
+        success: function (data) {
+            $("#playlist_songs").html(data);
+        }
+      })
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <br>
+    <h1>Playlist: {{playlist.2}}</h1>
+    <p>Author: {{playlist.0}}</p>
+    <p>Created: {{playlist.3}}</p>
+    <hr>
+    <div id="playlist_songs"></div>
+    <br>
+    <h2>Find Songs to Add</h2>
+    <form action="javascript:void(0);">
+      {% csrf_token %}
+      <input name="q" type="text" placeholder="Search..." id="id_q">
+    </form>
+    <div id="result"></div>
+</div>
+{% endblock %}
