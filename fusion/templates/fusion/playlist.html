@@ -40,11 +40,13 @@
     <hr>
     <div id="playlist_songs"></div>
     <br>
+    {% if is_owner %}
     <h2>Find Songs to Add</h2>
     <form action="javascript:void(0);">
       {% csrf_token %}
       <input name="q" type="text" placeholder="Search..." id="id_q">
     </form>
     <div id="result"></div>
+    {% endif %}
 </div>
 {% endblock %}

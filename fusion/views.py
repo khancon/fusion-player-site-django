@@ -137,6 +137,7 @@ class PlaylistDetailView(View):
         cnx.close()
         context = {}
         context['playlist'] = playlist
+        context['is_owner'] = (self.request.user.username == playlist[0])
         return render(request, 'fusion/playlist.html', context)
 
 class AlbumDetailView(View):
@@ -205,11 +206,17 @@ class PlaylistSongsView(View):
         song_list=[]
         for item in mycursor:
             song_list.append(item)
+        mycursor.execute("SELECT * FROM playlist WHERE playlist_id = %s", (playlist_id,))
+        playlist_creator = None
+        for item in mycursor:
+            playlist_creator = str(item[0])
+        is_owner = (playlist_creator == request.user.username)
         mycursor.close()
         cnx.close()
         context = {}
         context['object_list'] = song_list
         context['playlist_id'] = playlist_id
+        context['is_owner'] = is_owner
         return render(request, 'fusion/playlist_songs.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -245,9 +252,16 @@ def listeners(request):
     listener_list=[]
     for item in mycursor:
         listener_list.append(item)
+
+    #mycursor.execute("SELECT * FROM listener")
+
+
     mycursor.close()
     cnx.close()
-    return render(request, 'fusion/listeners.html', {'listener_list': listener_list})
+    context = {}
+    context['listener_list'] = listener_list
+    context['friends_list'] = listener_list
+    return render(request, 'fusion/listeners.html', context)
 
 class ListenerDetailView(View):
     def get(self, request, *args, **kwargs):
