@@ -118,12 +118,40 @@ class PlaylistSearchView(ListView):
         cnx.close()
         return playlist_list
 
-class PlaylistModificationView(View):
+class PlaylistSongsView(View):
     def get(self, request, *args, **kwargs):
-        print("HEY, GET")
+        playlist_id = kwargs['playlist_id']
+        mycursor, cnx = getCursor()
+        mycursor.execute("SELECT DISTINCT * FROM containing NATURAL JOIN song NATURAL JOIN album WHERE playlist_id = %s", (playlist_id,))
+        song_list=[]
+        for item in mycursor:
+            song_list.append(item)
+        mycursor.close()
+        cnx.close()
+        context = {}
+        context['object_list'] = song_list
+        print(song_list)
+        return render(request, 'fusion/playlist_songs.html', context)
 
     def post(self, request, *args, **kwargs):
-        print("HEY, POST")
+        song_id = self.request.POST['song_id']
+        playlist_id = self.request.POST['playlist_id']
+        mycursor, cnx = getCursor()
+        mycursor.execute("INSERT INTO containing (playlist_id, song_id) VALUES(%s,%s)", (playlist_id, song_id))
+        cnx.commit()
+        mycursor.close()
+        cnx.close()
+        return PlaylistSongsView.get(self, request, playlist_id=playlist_id)
+
+    def delete(self, request, *args, **kwargs):
+        song_id = self.request.POST['song_id']
+        playlist_id = self.request.POST['playlist_id']
+        mycursor, cnx = getCursor()
+        mycursor.execute("DELETE FROM containing WHERE playlist_id = %s and song_id = %s", (playlist_id, song_id))
+        cnx.commit()
+        mycursor.close()
+        cnx.close()
+        return PlaylistSongsView.get(self, request, playlist_id=playlist_id)
 
 def listeners(request):
     mycursor, cnx = getCursor()
@@ -133,6 +161,7 @@ def listeners(request):
     listener_list=[]
     for item in mycursor:
         listener_list.append(item)
+    mycursor.close()
     cnx.close()
     return render(request, 'fusion/listeners.html', {'listener_list': listener_list})
 
