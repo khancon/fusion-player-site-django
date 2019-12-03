@@ -253,14 +253,16 @@ def listeners(request):
     for item in mycursor:
         listener_list.append(item)
 
-    #mycursor.execute("SELECT * FROM listener")
-
+    mycursor.execute("SELECT l.username, f.listener_username, f.friend_username FROM listener l INNER JOIN friends_with f on l.username = f.listener_username")
+    friends_list = []
+    for item in mycursor:
+        friends_list.append(item[2])
 
     mycursor.close()
     cnx.close()
     context = {}
     context['listener_list'] = listener_list
-    context['friends_list'] = listener_list
+    context['friends_list'] = friends_list
     return render(request, 'fusion/listeners.html', context)
 
 class ListenerDetailView(View):

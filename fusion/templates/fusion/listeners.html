@@ -10,8 +10,8 @@
             {% if forloop.first %}<div class="row">{% endif %}
             <div class="col-sm-4">
                 <div class="card text-center">
-                    <a class="card-body" style="background-color:#f1c40f;color:black" href="{% url 'listener' obj.0 %}" >
-                        <h4 class="card-title">{{ obj.0|capfirst }}</h5>
+                    <a class="card-body" style="background-color:#f1c40f;color:black" href="{% url 'listener' obj %}" >
+                        <h4 class="card-title">{{ obj|capfirst }}</h5>
                 
                         </a>
                 </div>
