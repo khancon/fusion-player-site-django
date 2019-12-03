@@ -160,7 +160,7 @@ class AlbumDetailView(View):
 class InfoPageView(View):
     def get(self, request, *args, **kwargs):
         mycursor, cnx = getCursor()
-        mycursor.execute("SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY song_id")
+        mycursor.execute("SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY name")
         song_list=[]
         for item in mycursor:
             song_list.append(item)
