@@ -64,6 +64,19 @@ class SongSearchView(View):
 class AlbumsView(TemplateView):
     template_name = 'fusion/albums.html'
 
+class ArtistsView(View):
+    def get(self, request, *args, **kwargs):
+        mycursor, cnx = getCursor()
+        mycursor.execute("SELECT DISTINCT * FROM artist")
+        artist_list=[]
+        for item in mycursor:
+            artist_list.append(item)
+        mycursor.close()
+        cnx.close()
+        context={}
+        context['obj_list'] = artist_list
+        return render(request, 'fusion/artists.html', context)
+
 class AlbumSearchView(ListView):
     template_name = 'fusion/album_search.html'
 
@@ -125,6 +138,24 @@ class PlaylistDetailView(View):
         context = {}
         context['playlist'] = playlist
         return render(request, 'fusion/playlist.html', context)
+
+class AlbumDetailView(View):
+    def get(self, request, *args, **kwargs):
+        mycursor, cnx = getCursor()
+        username = self.request.user
+        album_id = kwargs['album_id']
+        if album_id != None:
+            mycursor.execute("SELECT * FROM album NATURAL JOIN song WHERE album_id = %s", (album_id,))
+
+        albums = []
+        for item in mycursor:
+            albums.append(item)
+
+        mycursor.close()
+        cnx.close()
+        context = {}
+        context['albums'] = albums
+        return render(request, 'fusion/album.html', context)
 
 class InfoPageView(View):
     def get(self, request, *args, **kwargs):

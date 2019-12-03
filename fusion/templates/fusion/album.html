@@ -1,0 +1,26 @@
+{% extends 'fusion/base.html' %}
+
+{% block content %}
+<div class="container">
+    <br>
+    <h1>Songs in {{albums.0.3}}</h1>
+    <hr>
+    {% for obj in albums %}
+        <!-- <li>
+            {{ obj }}
+        </li> -->
+        {% if forloop.first %}<div class="row">{% endif %}
+        <div class="col-sm-4 text-center">
+            <div class="card" >
+                <div class="card-body" style="background-color:#e74c3c;color:white">
+                    <h4 class="card-title">{{ obj.7 }}</h4>
+                    Track {{obj.4}} <br>
+                    {{obj.1}}, {{obj.2}}
+                </div>
+            </div>
+        </div>
+        {% if forloop.counter|divisibleby:3 %}</div><br><div class="row">{% endif %}
+        {% if forloop.last %}</div>{% endif %}
+    {% endfor %}
+</div>
+{% endblock %}
