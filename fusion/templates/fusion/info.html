@@ -5,8 +5,20 @@
     <br>
     <h1>Downloading...</h1>
     <hr>
-    <div class="span9 btn-block">
-        <a href="{% url 'info' %}" class="btn btn-large btn-block" type="button" style="background-color:#9b59b6;color:white" name="artist-click">Export Your Playlist Info</a>
+    {% for obj in object_list %}
+    <!-- <li>
+        {{ obj }}
+    </li> -->
+    {% if forloop.first %}<div class="row">{% endif %}
+    <div class="col-sm-4">
+        <div class="card" style="border-color:#e74c3c">
+            <div class="card-body" style="background-color:white;color:#e74c3c">
+                <h4 class="card-title">{{ obj }}</h5>
+            </div>
+        </div>
     </div>
+    {% if forloop.counter|divisibleby:3 %}</div><br><div class="row">{% endif %}
+    {% if forloop.last %}</div>{% endif %}
+{% endfor %}
 </div>
 {% endblock %}

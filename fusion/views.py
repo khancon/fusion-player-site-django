@@ -126,7 +126,15 @@ class PlaylistDetailView(View):
 
 class InfoPageView(View):
     def get(self, request, *args, **kwargs):
+        mycursor, cnx = getCursor()
+        mycursor.execute("SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY song_id")
+        song_list=[]
+        for item in mycursor:
+            song_list.append(item)
+        mycursor.close()
+        cnx.close()
         context = {}
+        context['object_list'] = song_list
         return render(request, 'fusion/info.html', context)
 
 class PlaylistSearchView(ListView):
@@ -190,3 +198,4 @@ def listeners(request):
     cnx.close()
     return render(request, 'fusion/listeners.html', {'listener_list': listener_list})
 
+#SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY song_id 
