@@ -196,6 +196,9 @@ class PlaylistSearchView(ListView):
         cnx.close()
         return playlist_list
 
+class ByUsView(TemplateView):
+    template_name = 'fusion/by_us.html'
+
 class PlaylistSongsView(View):
     def get(self, request, *args, **kwargs):
         playlist_id = request.GET.get('playlist_id')

@@ -24,4 +24,5 @@ urlpatterns = [
     path('info/', InfoPageView.as_view(), name="info"),
     path('ajax/playlist_songs/', PlaylistSongsView.as_view(), name='playlist_songs'),
     path('ajax/friends/', FriendsView.as_view(), name='friends'),
+    path('by_us/', ByUsView.as_view(), name="by_us")
 ]
