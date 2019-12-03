@@ -4,6 +4,7 @@ from django.views.generic import TemplateView, ListView, View
 from .forms import NameForm
 import mysql.connector
 import datetime
+from django.contrib.auth.models import User
 
 
 #------ Helper function  --------#
@@ -14,11 +15,30 @@ def getCursor():
 
 #------- Views -----#
 
-class IndexView(TemplateView):
-    template_name = 'fusion/index.html'
+class IndexView(View):
+    # template_name = 'fusion/index.html'
+    def get(self, request, *args, **kwargs):
+        mycursor, cnx = getCursor()
+        users = User.objects.all()
+        mycursor.execute("SELECT * FROM listener")
+        username_list = []
+        for item in mycursor:
+            username_list.append(item[0])
+        
+        print(username_list)
+        for user in users:
+            if user.username not in username_list:
+                mycursor.execute("INSERT INTO listener(username, password) VALUES (%s,%s)", (user.username, user.password))
+                cnx.commit()
+
+        mycursor.close()
+        cnx.close()
+        context = {}
+        return render(request, "fusion/index.html", context)
+
 
 class WelcomePageView(TemplateView):
-    template_name = 'fusion/welcome.html'
+    template_name= 'fusion/welcome.html'
 
 class SongsView(TemplateView):
     template_name = 'fusion/songs.html'
@@ -104,6 +124,11 @@ class PlaylistDetailView(View):
         context['playlist'] = playlist
         return render(request, 'fusion/playlist.html', context)
 
+class InfoPageView(View):
+    def get(self, request, *args, **kwargs):
+        context = {}
+        return render(request, 'fusion/info.html', context)
+
 class PlaylistSearchView(ListView):
     template_name = 'fusion/playlist_search.html'
 
@@ -127,9 +152,9 @@ class PlaylistModificationView(View):
 
 def listeners(request):
     mycursor, cnx = getCursor()
-    mycursor.execute("INSERT INTO Album(album_id, genre, year, name) VALUES(%s,%s,%s,%s)", ('21', 'Hip Hop', '2015', 'City Girlsss'))
-    cnx.commit()
-    mycursor.execute("SELECT * FROM Album")
+    # mycursor.execute("INSERT INTO Album(album_id, genre, year, name) VALUES(%s,%s,%s,%s)", ('21', 'Hip Hop', '2015', 'City Girlsss'))
+    # cnx.commit()
+    mycursor.execute("SELECT * FROM listener")
     listener_list=[]
     for item in mycursor:
         listener_list.append(item)
