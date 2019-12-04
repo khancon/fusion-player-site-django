@@ -28,7 +28,6 @@ class IndexView(View):
         for item in mycursor:
             username_list.append(item[0].upper())
         
-        print(username_list)
         for user in users:
             if user.username.upper() not in username_list:
                 mycursor.execute("INSERT INTO listener(username, password) VALUES (%s,%s)", (user.username, user.password))
@@ -249,18 +248,17 @@ class PlaylistSongsView(View):
         return PlaylistSongsView.get(self, request, playlist_id=playlist_id)
 
 def listeners(request):
+    current_username = request.user.username
     mycursor, cnx = getCursor()
-    # mycursor.execute("INSERT INTO Album(album_id, genre, year, name) VALUES(%s,%s,%s,%s)", ('21', 'Hip Hop', '2015', 'City Girlsss'))
-    # cnx.commit()
     mycursor.execute("SELECT * FROM listener")
     listener_list=[]
     for item in mycursor:
         listener_list.append(item)
 
-    mycursor.execute("SELECT l.username, f.listener_username, f.friend_username FROM listener l INNER JOIN friends_with f on l.username = f.listener_username")
+    mycursor.execute("SELECT friend_username FROM friends_with WHERE listener_username = %s", (current_username,))
     friends_list = []
     for item in mycursor:
-        friends_list.append(item[2])
+        friends_list.append(item[0])
 
     mycursor.close()
     cnx.close()
@@ -337,9 +335,7 @@ class MashupView(View):
         playlist_id = None
         for item in mycursor:
             playlist_id = item[0]
-        print(playlist_id)
         sampling = list(dict.fromkeys(sampling))
-        print(sampling)
         for song_id in sampling:
             mycursor.execute("INSERT INTO containing (playlist_id, song_id) VALUES(%s,%s)", (playlist_id, song_id))
         cnx.commit()
