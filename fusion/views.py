@@ -7,6 +7,7 @@ import datetime
 from django.contrib.auth.models import User
 import json
 import csv
+import random
 
 
 #------ Helper function  --------#
@@ -25,11 +26,10 @@ class IndexView(View):
         mycursor.execute("SELECT * FROM listener")
         username_list = []
         for item in mycursor:
-            username_list.append(item[0])
+            username_list.append(item[0].upper())
         
-        print(username_list)
         for user in users:
-            if user.username not in username_list:
+            if user.username.upper() not in username_list:
                 mycursor.execute("INSERT INTO listener(username, password) VALUES (%s,%s)", (user.username, user.password))
                 cnx.commit()
 
@@ -63,6 +63,19 @@ class SongSearchView(View):
 
 class AlbumsView(TemplateView):
     template_name = 'fusion/albums.html'
+
+class ArtistsView(View):
+    def get(self, request, *args, **kwargs):
+        mycursor, cnx = getCursor()
+        mycursor.execute("SELECT DISTINCT * FROM artist")
+        artist_list=[]
+        for item in mycursor:
+            artist_list.append(item)
+        mycursor.close()
+        cnx.close()
+        context={}
+        context['obj_list'] = artist_list
+        return render(request, 'fusion/artists.html', context)
 
 class AlbumSearchView(ListView):
     template_name = 'fusion/album_search.html'
@@ -102,7 +115,7 @@ class PlaylistsView(View):
         query = self.request.POST['name']
         time = datetime.datetime.now().replace(microsecond=0).isoformat()
         if username != 'AnonymousUser':
-            mycursor.execute("INSERT INTO playlist(username, name, time_created) VALUES(%s,%s,%s)", (username,query,time))
+            mycursor.execute("INSERT INTO playlist(username, name,time_created) VALUES(%s,%s,%s)", (username,query,time))
             cnx.commit()
         mycursor.close()
         cnx.close()
@@ -124,12 +137,31 @@ class PlaylistDetailView(View):
         cnx.close()
         context = {}
         context['playlist'] = playlist
+        context['is_owner'] = (self.request.user.username == playlist[0])
         return render(request, 'fusion/playlist.html', context)
+
+class AlbumDetailView(View):
+    def get(self, request, *args, **kwargs):
+        mycursor, cnx = getCursor()
+        username = self.request.user
+        album_id = kwargs['album_id']
+        if album_id != None:
+            mycursor.execute("SELECT * FROM album NATURAL JOIN song WHERE album_id = %s", (album_id,))
+
+        albums = []
+        for item in mycursor:
+            albums.append(item)
+
+        mycursor.close()
+        cnx.close()
+        context = {}
+        context['albums'] = albums
+        return render(request, 'fusion/album.html', context)
 
 class InfoPageView(View):
     def get(self, request, *args, **kwargs):
         mycursor, cnx = getCursor()
-        mycursor.execute("SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY song_id")
+        mycursor.execute("SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY time_created")
         song_list=[]
         for item in mycursor:
             song_list.append(item)
@@ -164,6 +196,9 @@ class PlaylistSearchView(ListView):
         cnx.close()
         return playlist_list
 
+class ByUsView(TemplateView):
+    template_name = 'fusion/by_us.html'
+
 class PlaylistSongsView(View):
     def get(self, request, *args, **kwargs):
         playlist_id = request.GET.get('playlist_id')
@@ -174,11 +209,17 @@ class PlaylistSongsView(View):
         song_list=[]
         for item in mycursor:
             song_list.append(item)
+        mycursor.execute("SELECT * FROM playlist WHERE playlist_id = %s", (playlist_id,))
+        playlist_creator = None
+        for item in mycursor:
+            playlist_creator = str(item[0])
+        is_owner = (playlist_creator == request.user.username)
         mycursor.close()
         cnx.close()
         context = {}
         context['object_list'] = song_list
         context['playlist_id'] = playlist_id
+        context['is_owner'] = is_owner
         return render(request, 'fusion/playlist_songs.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -207,15 +248,97 @@ class PlaylistSongsView(View):
         return PlaylistSongsView.get(self, request, playlist_id=playlist_id)
 
 def listeners(request):
+    current_username = request.user.username
     mycursor, cnx = getCursor()
-    # mycursor.execute("INSERT INTO Album(album_id, genre, year, name) VALUES(%s,%s,%s,%s)", ('21', 'Hip Hop', '2015', 'City Girlsss'))
-    # cnx.commit()
     mycursor.execute("SELECT * FROM listener")
     listener_list=[]
     for item in mycursor:
         listener_list.append(item)
+
+    mycursor.execute("SELECT friend_username FROM friends_with WHERE listener_username = %s", (current_username,))
+    friends_list = []
+    for item in mycursor:
+        friends_list.append(item[0])
+
     mycursor.close()
     cnx.close()
-    return render(request, 'fusion/listeners.html', {'listener_list': listener_list})
+    context = {}
+    context['listener_list'] = listener_list
+    context['friends_list'] = friends_list
+    return render(request, 'fusion/listeners.html', context)
 
-#SELECT DISTINCT * FROM `playlist` NATURAL JOIN `containing` NATURAL JOIN `song` ORDER BY song_id 
+class ListenerDetailView(View):
+    def get(self, request, *args, **kwargs):
+        listener_username = kwargs['listener_username']
+        mycursor, cnx = getCursor()
+        if listener_username != None:
+            mycursor.execute("SELECT * FROM listener WHERE username = %s", (listener_username,))
+
+        listener = None
+        for item in mycursor:
+            listener = item
+
+        if listener != 'AnonymousUser':
+            mycursor.execute("SELECT * FROM playlist WHERE username = %s", (listener[0],))
+        
+        my_playlists=[]
+        for item in mycursor:
+            my_playlists.append(item)
+
+        mycursor.close()
+        cnx.close()
+        context = {}
+        context['listener'] = listener[0]
+        context['current_user'] = str(self.request.user)
+        context['my_playlists'] = my_playlists
+        return render(request, 'fusion/listener.html', context)
+
+class FriendsView(View):
+    def get(self, request, *args, **kwargs):
+        return HttpResponse("got friend")
+
+    def post(self, request, *args, **kwargs):
+        current_user = self.request.POST['current_user']
+        listener = self.request.POST['listener']
+        date = datetime.datetime.now().replace(microsecond=0).isoformat()
+        mycursor, cnx = getCursor()
+        mycursor.execute("INSERT INTO friends_with (listener_username, friend_username, starting_date) VALUES(%s,%s, %s)", (current_user, listener, date))
+        cnx.commit()
+        mycursor.close()
+        cnx.close()
+        return HttpResponse(listener + " added as a friend")
+
+class MashupView(View):
+    def get(self, request, *args, **kwargs):
+        return HttpResponse("got mashup")
+
+    def post(self, request, *args, **kwargs):
+        current_user = self.request.POST['current_user']
+        listener = self.request.POST['listener']
+        date = datetime.datetime.now().replace(microsecond=0).isoformat()
+        mycursor, cnx = getCursor()
+        my_songs = []
+        listener_songs = []
+        mycursor.execute("SELECT song_id FROM `playlist` JOIN `containing` USING (playlist_id) JOIN `song` USING (song_id) WHERE username = %s", (current_user,))
+        for item in mycursor:
+            my_songs.append(item[0])
+        mycursor.execute("SELECT song_id FROM `playlist` JOIN `containing` USING (playlist_id) JOIN `song` USING (song_id) WHERE username = %s", (listener,))
+        for item in mycursor:
+            my_songs.append(item[0])
+        sampling = random.choices(my_songs, k=10)
+        
+        date = datetime.datetime.now().replace(microsecond=0).isoformat()
+        mashup_name = current_user + ' and ' + listener + ' mashup'
+        mycursor.execute("INSERT INTO playlist (username, name, time_created) VALUES(%s,%s, %s)", (current_user, mashup_name, date))
+        cnx.commit()
+        mycursor.execute("SELECT playlist_id FROM `playlist` WHERE name = %s", (mashup_name,))
+        playlist_id = None
+        for item in mycursor:
+            playlist_id = item[0]
+        sampling = list(dict.fromkeys(sampling))
+        for song_id in sampling:
+            mycursor.execute("INSERT INTO containing (playlist_id, song_id) VALUES(%s,%s)", (playlist_id, song_id))
+        cnx.commit()
+        mycursor.close()
+        cnx.close()
+        return HttpResponse("Mashup created")

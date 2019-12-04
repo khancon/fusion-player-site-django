@@ -1,0 +1,99 @@
+{% extends 'fusion/base.html' %}
+
+{% block javascript %}
+  <script>
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        }
+    });
+
+    function addFriend(current_user, listener) {
+      $.ajax({
+        type: "POST",
+        url: '/ajax/friends/',
+        data: {
+            'current_user': current_user,
+            'listener': listener,
+            'csrfmiddlewaretoken': getCookie('csrftoken')
+        },
+        dataType: 'html',
+        success: function (data) {
+            $("#friend_status").html(data);
+        }
+      })
+    }
+
+    function createMashup(current_user, listener) {
+      $.ajax({
+        type: "POST",
+        url: '/ajax/mashup/',
+        data: {
+            'current_user': current_user,
+            'listener': listener,
+            'csrfmiddlewaretoken': getCookie('csrftoken')
+        },
+        dataType: 'html',
+        success: function (data) {
+            $("#mashup_status").html(data);
+        }
+      })
+    }
+  </script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <br>
+  <h1>User: {{listener}}</h1>
+  <div id="friend_status"></div>
+  <div id="mashup_status"></div>
+  <a onclick="addFriend('{{current_user}}','{{listener}}')" class="btn btn-small" type="button" style="background-color:#2ecc71;color:white" name="playlist-click">Add friend</a>
+  <a onclick="createMashup('{{current_user}}','{{listener}}')" class="btn btn-small" type="button" style="background-color:#2ecc71;color:white" name="mashup-click">Create Mashup</a>
+  <hr>
+  <h2>{{listener}}'s Playlists</h2>
+    <hr>
+    {% for obj in my_playlists %}
+      {% if forloop.first %}<div class="row">{% endif %}
+        <div class="col-sm-4">
+            <div class="card text-center" style="border-color:#2ecc71">
+                <div class="card-body" style="background-color:white;color:#2ecc71">
+                    <h4 class="card-title">{{ obj.2 }}</h5>
+                    By {{obj.0}} | Created {{obj.3}} <br><br>
+                    <a href="{% url 'playlist' playlist_id=obj.1 %}" class="btn btn-large" type="button" style="background-color:#2ecc71;color:white" name="playlist-click">View Playlist</a>
+                </div>
+            </div>
+        </div>
+        {% if forloop.counter|divisibleby:3 %}</div><br><div class="row">{% endif %}
+        {% if forloop.last %}</div>{% endif %}
+    {% empty %}
+        <p>{{listener}} does not have any playlists</p>
+    {% endfor %}
+    <br>
+  
+  <div id="result"></div>
+</div>
+{% endblock %}
